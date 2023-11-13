@@ -12,11 +12,13 @@ def gerar_horario():
 # Função de avaliação (fitness)
 def avaliar_horario(individuo):
     # Implemente a lógica para avaliar a qualidade do horário
-    # Considere conflitos de horários, pré-requisitos, etc.
-    # Retorne uma tupla com o valor de aptidão (quanto menor, melhor)
-    return (random.random(),)
+    # Aqui, usamos uma abordagem simples contando o número de disciplinas duplicadas
+    disciplinas_unicas = set(individuo)
+    quantidade_duplicadas = len(individuo) - len(disciplinas_unicas)
+    # Quanto menor a quantidade de disciplinas duplicadas, melhor
+    return (quantidade_duplicadas,)
 
-# Configuração da biblioteca DEAP
+# Biblioteca DEAP
 creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
 creator.create("Individual", list, fitness=creator.FitnessMin)
 
@@ -29,15 +31,19 @@ toolbox.register("mate", tools.cxTwoPoint)
 toolbox.register("mutate", tools.mutUniformInt, low=1, up=NUM_DISCIPLINAS, indpb=0.2)
 toolbox.register("select", tools.selTournament, tournsize=3)
 
-# Criação da população
-populacao = toolbox.population(n=100)
+def main():
+    # Criação da população
+    populacao = toolbox.population(n=100)
 
-# Execução do algoritmo genético
-algoritmo_genetico = algorithms.eaSimple(populacao, toolbox, cxpb=0.7, mutpb=0.2, ngen=50, stats=None, halloffame=None, verbose=True)
+    # Execução do algoritmo genético
+    algoritmo_genetico = algorithms.eaSimple(populacao, toolbox, cxpb=0.7, mutpb=0.2, ngen=50, stats=None, halloffame=None, verbose=True)
 
-# Obtém o melhor indivíduo encontrado
-melhor_horario = tools.selBest(populacao, k=1)[0]
+    # Obtém o melhor indivíduo encontrado
+    melhor_horario = tools.selBest(populacao, k=1)[0]
 
-# Imprime o melhor horário
-print("Melhor Horário Encontrado:")
-print(melhor_horario)
+    # Imprime o melhor horário
+    print("Melhor Horário Encontrado:")
+    print(melhor_horario)
+
+if __name__ == "__main__":
+    main()
