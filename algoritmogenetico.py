@@ -1,9 +1,12 @@
 import random
 from deap import creator, base, tools, algorithms
+import matplotlib.pyplot as plt
+import numpy as np
+from def_AG import *
 
 NUM_PERIODOS = 4
 NUM_DISCIPLINAS = 8
-TAMANHO_PERIODO = 5  # Número de dias da semana
+TAMANHO_PERIODO = 5  
 
 # Função para gerar um indivíduo aleatório (horário)
 def gerar_horario():
@@ -31,6 +34,35 @@ toolbox.register("mate", tools.cxTwoPoint)
 toolbox.register("mutate", tools.mutUniformInt, low=1, up=NUM_DISCIPLINAS, indpb=0.2)
 toolbox.register("select", tools.selTournament, tournsize=3)
 
+def criar_histograma(dados, titulo_grafico, titulo_eixo_x, titulo_eixo_y, nome_arquivo_saida, bins=None):
+    if not dados:
+        print("Erro: Não há dados para criar o gráfico.")
+        return
+
+    bins = len(set(dados)) + 1  
+
+    plt.figure(figsize=(10, 6))
+    plt.hist(dados, bins=bins, density=True, alpha=0.7, edgecolor='k')
+
+    plt.title(titulo_grafico)
+    plt.xlabel(titulo_eixo_x)
+    plt.ylabel(titulo_eixo_y)
+    plt.grid(True)
+
+    plt.savefig(f'saida/{nome_arquivo_saida}.png')
+    plt.show()
+
+def cria_histograma_automatico():
+    
+    dados = [1, 2, 2, 3, 3, 3, 4, 4, 5, 5, 5, 5]
+    titulo_grafico = "Gráfico de Histograma"
+    titulo_eixo_x = "Valores"
+    titulo_eixo_y = "Frequência normalizada"
+    nome_arquivo_saida = "histograma_predefinido"
+    
+    criar_histograma(dados, titulo_grafico, titulo_eixo_x, titulo_eixo_y, nome_arquivo_saida)
+
+
 def main():
     # Criação da população
     populacao = toolbox.population(n=100)
@@ -44,6 +76,8 @@ def main():
     # Imprime o melhor horário
     print("Melhor Horário Encontrado:")
     print(melhor_horario)
+
+    cria_histograma_automatico()
 
 if __name__ == "__main__":
     main()
