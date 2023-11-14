@@ -1,10 +1,9 @@
-import random
-from deap import creator, base, tools, algorithms
 import matplotlib.pyplot as plt
 import numpy as np
+from deap import creator, base, tools, algorithms
 from def_AG import criar_cromossomo, disciplinas, NUM_PERIODOS, TAMANHO_PERIODO, NUM_DISCIPLINAS
+import random
 
-# Função para gerar um indivíduo aleatório (horário)
 def gerar_horario():
     return [random.randint(1, NUM_DISCIPLINAS) for _ in range(TAMANHO_PERIODO * NUM_PERIODOS)]
 
@@ -19,7 +18,7 @@ def avaliar_horario(individuo):
         horarios_ocupados[dia] = []
 
     # Verifica cada período no cromossomo
-    for periodo, disciplina in enumerate(individuo):
+    for disciplina in individuo:
         if disciplina in disciplinas:  # Verifica se a disciplina existe no dicionário
             # Obtém o horário da disciplina
             horario = disciplinas[disciplina]['horario']
@@ -35,8 +34,7 @@ def avaliar_horario(individuo):
             # Atualiza os horários ocupados para o dia atual
             horarios_ocupados[dia].append((horario_inicio, horario_fim))
         else:
-            # Se a disciplina não existir, conte como um conflito
-            conflitos += 1
+            conflitos += 1 # Se a disciplina não existir, cont+1 conflito
 
     return (conflitos,)
 
@@ -52,14 +50,47 @@ toolbox.register("mate", tools.cxTwoPoint)
 toolbox.register("mutate", tools.mutUniformInt, low=1, up=NUM_DISCIPLINAS, indpb=0.2)
 toolbox.register("select", tools.selTournament, tournsize=3)
 
+def plot_horarios(cromossomo):
+    periods = len(cromossomo)
+    days = len(cromossomo[0])
+
+    # Criar uma matriz com zeros representando os horários vazios
+    data = np.zeros((periods, days))
+
+    # Preencher a matriz com os índices das disciplinas alocadas
+    for i in range(periods):
+        for j in range(days):
+            if cromossomo[i][j] != '':
+                data[i][j] = 1  # Para marcar a alocação de uma disciplina
+
+    fig, ax = plt.subplots(figsize=(8, 6))
+    im = ax.imshow(data, cmap='viridis', interpolation='nearest')
+
+    # Definir rótulos e títulos
+    ax.set_xticks(np.arange(days))
+    ax.set_yticks(np.arange(periods))
+    ax.set_xticklabels(['Seg', 'Ter', 'Qua', 'Qui', 'Sex'])  # Dias da semana
+    ax.set_yticklabels(np.arange(1, periods + 1))  # Períodos
+
+    # Adicionar barra de cores
+    cbar = ax.figure.colorbar(im, ax=ax)
+    cbar.set_label('Disciplina Alocada')
+
+    # Mostrar o gráfico
+    plt.title('Alocação de Disciplinas nos Horários')
+    plt.xlabel('Dias da Semana')
+    plt.ylabel('Períodos')
+    plt.savefig(f'saida/algoritmogenetico.png')
+    plt.show()
+
 def selecao(populacao):
-    return tools.selTournament(populacao, tournsize=3)
+    return tools.selRouletteWheel(populacao, len(populacao))
 
 def crossover(individuo1, individuo2):
-    return tools.cxTwoPoint(individuo1, individuo2)
+    return tools.cxUniform(individuo1, individuo2)
 
 def mutacao(individuo, indpb=0.05):
-    return tools.mutUniformInt(individuo, low=1, up=NUM_DISCIPLINAS, indpb=indpb)[0]
+    return tools.mutShuffle(individuo, indpb)
 
 # Algoritmo genético principal
 def algoritmo_genetico(pop_size=100, n_gen=500):
@@ -78,6 +109,7 @@ def algoritmo_genetico(pop_size=100, n_gen=500):
     max_fit = logbook.select("max")
 
     # Criação do gráfico
+    '''''
     plt.figure(figsize=(10, 6))
     plt.plot(gen, avg, label="Média")
     plt.plot(gen, min_fit, label="Mínimo")
@@ -90,10 +122,14 @@ def algoritmo_genetico(pop_size=100, n_gen=500):
     
     plt.savefig(f'saida/evolucao_fitness.png')
     plt.show()
-    
+    '''
     return pop, logbook
 
 if __name__ == "__main__":
     horarios = criar_cromossomo(disciplinas, NUM_PERIODOS, TAMANHO_PERIODO)
-    print(horarios)
-    algoritmo_genetico(n_gen=500) #500 Iterações
+    plot_horarios(horarios)  # Chamada para plotar os horários iniciais
+    
+    algoritmo_genetico(n_gen=500)  # Chamada do algoritmo genético
+
+    # Chamada para plotar os horários otimizados após o algoritmo genético
+    plot_horarios(horarios)
