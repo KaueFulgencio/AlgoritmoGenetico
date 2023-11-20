@@ -117,6 +117,11 @@ def avaliar_horario(individuo):
 
     return conflitos,
 
+
+def calculate_diversity(population):
+    unique_individuals = set(map(tuple, population))
+    return len(unique_individuals) / len(population)
+
 def algoritmo_genetico(pop_size=100, n_gen=500):
     creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
     creator.create("Individual", list, fitness=creator.FitnessMin)
@@ -136,7 +141,7 @@ def algoritmo_genetico(pop_size=100, n_gen=500):
     stats.register("max", np.max)
     
     # Registrar a função de diversidade corretamente
-    stats.register("diversity", diversity)
+    stats.register("diversity", calculate_diversity)
 
     # Inicialização personalizada da população usando criar_cromossomo
     pop = [toolbox.individual() for _ in range(pop_size)]
