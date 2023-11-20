@@ -139,7 +139,6 @@ def algoritmo_genetico(pop_size=100, n_gen=500):
 
     return pop, logbook
 
-
 def criar_cromossomo(disciplinas, num_periodos, tamanho_periodo):
     cromossomo = [[''] * tamanho_periodo for _ in range(num_periodos)]
     disciplinas_disponiveis = list(disciplinas.keys())
@@ -162,8 +161,6 @@ def criar_cromossomo(disciplinas, num_periodos, tamanho_periodo):
 
 def gerar_horario_inicial():
     return criar_cromossomo(disciplinas, NUM_PERIODOS, TAMANHO_PERIODO)
-
-
 
 creator.create("FitnessMin", base.Fitness, weights=(-1.0,))
 creator.create("Individual", list, fitness=creator.FitnessMin)
