@@ -44,7 +44,7 @@ def plot_horarios_pandas(cromossomo, label):
     plt.xlabel('Dias da Semana')
     plt.ylabel('Períodos')
 
-    plt.savefig(f'saida/alocacao_{label.lower()}.png')
+    plt.savefig(f'saida/alocacao_pandas_{label.lower()}.png')
     plt.show()
     plt.close()
 

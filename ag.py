@@ -159,6 +159,10 @@ def criar_cromossomo(disciplinas, num_periodos, tamanho_periodo):
 
     return cromossomo
 
+def imprimir_horarios_finais(horarios_finais):
+    for periodo, horario in enumerate(horarios_finais, start=1):
+        print(f"Período {periodo}: {horario}")
+
 def gerar_horario_inicial():
     return criar_cromossomo(disciplinas, NUM_PERIODOS, TAMANHO_PERIODO)
 
@@ -177,23 +181,23 @@ toolbox.register("select", tools.selTournament, tournsize=3)
 if __name__ == "__main__":
     horarios_iniciais = gerar_horario_inicial()
     plot_horarios(horarios_iniciais, 'Inicial', None)
-    
 
     pop_final, logbook = algoritmo_genetico(n_gen=500)  
 
-    # Exibindo estatísticas adicionais
+    # estatísticas adicionais
     gen = logbook.select("gen")
     fit_mins = logbook.select("min")
     fit_avgs = logbook.select("avg")
     fit_maxs = logbook.select("max")
     diversity = logbook.select("diversity")
     
-    # horários otimizados depois do algoritmo genético
+    # horários otimizados pós algoritmo genético
     horarios_otimizados_depois = criar_cromossomo(disciplinas, NUM_PERIODOS, TAMANHO_PERIODO)
-    plot_horarios(horarios_otimizados_depois, 'Otimizado', 'depois')    
-    # Imprimindo os horários finais
+    plot_horarios(horarios_otimizados_depois, 'Otimizado', 'depois')
+        
     num_periodos = 4
     tamanho_periodo = 5
     horarios_finais = criar_cromossomo(disciplinas, num_periodos, tamanho_periodo)
+    imprimir_horarios_finais(horarios_finais)
     for periodo in horarios_finais:
         print(periodo)
