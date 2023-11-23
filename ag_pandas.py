@@ -49,6 +49,10 @@ def plot_horarios_pandas(cromossomo, label):
     plt.close()
 
     # Exportar para CSV
+    df.columns.name = 'Dias'
+    df.index.name = 'Períodos'
+
+    # Salvar o DataFrame com cabeçalhos no CSV
     df.to_csv(f'saida/alocacao_{label.lower()}.csv')
 
 def criar_cromossomo(disciplinas, num_periodos, tamanho_periodo):
@@ -154,10 +158,6 @@ def algoritmo_genetico(pop_size=100, n_gen=500):
     # Registro das funções e execução do algoritmo genético
     pop, logbook = algorithms.eaSimple(pop, toolbox, cxpb=0.7, mutpb=0.2, ngen=n_gen, stats=stats)
 
-    # Horários otimizados depois do algoritmo genético
-    horarios_otimizados_depois = criar_cromossomo(disciplinas, NUM_PERIODOS, TAMANHO_PERIODO)
-    plot_horarios_pandas(horarios_otimizados_depois, 'Otimizado')
-
     # Exibir estatísticas adicionais
     gen = logbook.select("gen")
     fit_mins = logbook.select("min")
@@ -177,7 +177,6 @@ def algoritmo_genetico(pop_size=100, n_gen=500):
 
     df = pd.DataFrame(data, columns=['Seg', 'Ter', 'Qua', 'Qui', 'Sex'])
     df.index = np.arange(1, periods + 1)
-    df.to_csv('saida/alocacao_otimizada.csv')
 
     return pop, logbook
 
