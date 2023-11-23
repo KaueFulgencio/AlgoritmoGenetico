@@ -37,7 +37,7 @@ def plot_horarios_pandas(cromossomo, label):
     df.index = np.arange(1, periods + 1)
 
     plt.figure(figsize=(8, 6))
-    plt.imshow(df, cmap='viridis', interpolation='nearest')
+    plt.imshow(df, cmap='cividis', interpolation='nearest')
 
     plt.colorbar(label='Disciplina Alocada')
     plt.title(f'Alocação de Disciplinas - {label}')
