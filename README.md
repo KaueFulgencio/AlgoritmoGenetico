@@ -1,18 +1,16 @@
-Horários Acadêmicos Otimizados com Algoritmos Genéticos
-Este é um script Python desenvolvido para otimizar a alocação de disciplinas em um calendário acadêmico usando algoritmos genéticos. Ele gera horários de aula para disciplinas com base em suas restrições de horário e pré-requisitos.
-
-Requisitos
+# Requisitos
 Python 3.x
 Bibliotecas: matplotlib, numpy, deap
-Certifique-se de instalar as bibliotecas necessárias antes de executar o script.
 
-Utilização
+# Utilização
 Para executar o script, use o seguinte comando:
 
 python ag.py 
 python ag_pandas.py
 
-Descrição
+# Descrição
+Este é um script Python desenvolvido para otimizar a alocação de disciplinas em um calendário acadêmico usando algoritmos genéticos. Ele gera horários de aula para disciplinas com base em suas restrições de horário e pré-requisitos.
+
 O script usa a biblioteca DEAP para implementar um algoritmo genético que gera e otimiza horários de aulas para um conjunto de disciplinas. Ele inclui as seguintes funcionalidades:
 
 Avaliação de Horário: Verifica conflitos de horário entre disciplinas e pré-requisitos.
@@ -21,7 +19,7 @@ Seleção, Cruzamento e Mutação: Aplica operadores genéticos para evoluir a p
 Estatísticas: Registra estatísticas sobre a evolução da população durante as gerações.
 Visualização de Horários: Gera gráficos mostrando os horários das disciplinas antes e depois da otimização.
 
-Estrutura do Script
+# Funções
 
 gerar_horario(): Gera um cromossomo (horário) aleatório.
 avaliar_horario(individuo): Avalia a adequação do horário em relação a conflitos.
@@ -32,7 +30,7 @@ algoritmo_genetico(pop_size, n_gen): Executa o algoritmo genético.
 criar_cromossomo(disciplinas, num_periodos, tamanho_periodo): Cria um cromossomo válido.
 imprimir_horarios_finais(horarios_finais): Mostra os horários finais.
 
-Funcionamento
+# Funcionamento
 Gera um horário inicial aleatório.
 Executa o algoritmo genético para otimização dos horários.
 Mostra estatísticas da otimização.
