@@ -21,6 +21,74 @@ disciplinas = {
 def gerar_horario():
     return [random.randint(1, NUM_DISCIPLINAS) for _ in range(TAMANHO_PERIODO * NUM_PERIODOS)]
 
+def calcular_media_desvio(lista):
+    mean = np.mean(lista)
+    std = np.std(lista)
+    return mean, std
+
+def gerar_horario_aleatorio():
+    horarios = []
+    disciplinas_disponiveis = list(disciplinas.keys())
+    for _ in range(NUM_PERIODOS):
+        horario_periodo = []
+        for _ in range(TAMANHO_PERIODO):
+            horario_periodo.append(random.choice(disciplinas_disponiveis))
+        horarios.append(horario_periodo)
+    return horarios
+
+def gerar_horario_manual():
+    horarios = []
+    for periodo in range(NUM_PERIODOS):
+        horario = []
+        for disciplina in range(TAMANHO_PERIODO):
+            horario.append(input(f"Disciplina para o período {periodo} - horário {disciplina}: "))
+        horarios.append(horario)
+    return horarios
+
+def plot_horarios(cromossomo, label, otimizacao):
+    periods = len(cromossomo)
+    days = len(cromossomo[0])
+
+    # Criar uma matriz com zeros representando os horários vazios
+    data = np.zeros((periods, days))
+
+    # Preencher a matriz com os índices das disciplinas alocadas
+    for i in range(periods):
+        for j in range(days):
+            if cromossomo[i][j] != '':
+                data[i][j] = 1  
+
+    fig, ax = plt.subplots(figsize=(8, 6))
+    im = ax.imshow(data, cmap='plasma', interpolation='nearest')
+
+    # Definir rótulos e títulos
+    ax.set_xticks(np.arange(days))
+    ax.set_yticks(np.arange(periods))
+    ax.set_xticklabels(['Seg', 'Ter', 'Qua', 'Qui', 'Sex'])  # Dias da semana
+    ax.set_yticklabels(np.arange(1, periods + 1))  # Períodos
+
+    # Barra de cores
+    cbar = ax.figure.colorbar(im, ax=ax)
+    cbar.set_label('Disciplina Alocada')
+    
+    # Título do gráfico
+    plt.title(f'Alocação de Disciplinas - {label}')
+
+    # Rótulos dos eixos
+    plt.xlabel('Dias da Semana')
+    plt.ylabel('Períodos')
+    
+    # Salvar a imagem antes de mostrar
+    if otimizacao == 'antes':
+        plt.savefig('saida/antes_otimizacao.png')
+    elif otimizacao == 'depois':
+        plt.savefig('saida/depois_otimizacao.png')
+    
+    # Mostrar o gráfico
+    plt.show()
+    plt.close()
+
+
 def avaliar_horario(individuo):
     conflitos = 0
     # Dicionário para armazenar horários ocupados por disciplinas
@@ -55,8 +123,6 @@ def inicializar_populacao(pop_size):
     populacao = []
     for _ in range(pop_size):
         # Criar indivíduos com uma distribuição preferencial de disciplinas
-        # Aqui você pode aplicar sua heurística de escolha ou preferência
-        # Por exemplo, distribuição uniforme de disciplinas ou outras regras específicas
 
         # Criação de um indivíduo fictício como exemplo
         individuo = random.sample(disciplinas.keys(), len(disciplinas.keys()))
@@ -64,46 +130,6 @@ def inicializar_populacao(pop_size):
     
     return populacao
 
-def plot_horarios(cromossomo, label, otimizacao):
-    periods = len(cromossomo)
-    days = len(cromossomo[0])
-
-    # Criar uma matriz com zeros representando os horários vazios
-    data = np.zeros((periods, days))
-
-    # Preencher a matriz com os índices das disciplinas alocadas
-    for i in range(periods):
-        for j in range(days):
-            if cromossomo[i][j] != '':
-                data[i][j] = 1  
-
-    fig, ax = plt.subplots(figsize=(8, 6))
-    im = ax.imshow(data, cmap='viridis', interpolation='nearest')
-
-    # Definir rótulos e títulos
-    ax.set_xticks(np.arange(days))
-    ax.set_yticks(np.arange(periods))
-    ax.set_xticklabels(['Seg', 'Ter', 'Qua', 'Qui', 'Sex'])  # Dias da semana
-    ax.set_yticklabels(np.arange(1, periods + 1))  # Períodos
-
-    # Barra de cores
-    cbar = ax.figure.colorbar(im, ax=ax)
-    cbar.set_label('Disciplina Alocada')
-
-    # Salvar a imagem antes de mostrar
-    if otimizacao == 'antes':
-        plt.savefig('saida/antes_otimizacao.png')
-    elif otimizacao == 'depois':
-        plt.savefig('saida/depois_otimizacao.png')
-
-    # Mostrar o gráfico
-    plt.title(f'Alocação de Disciplinas - {label}')
-    plt.xlabel('Dias da Semana')
-    plt.ylabel('Períodos')
-    plt.show()
-    plt.close();
-    
-    
 def selecao(populacao):
     return tools.selRouletteWheel(populacao, len(populacao))
 
@@ -178,19 +204,38 @@ toolbox.register("mate", tools.cxBlend, alpha=0.5)
 toolbox.register("mutate", tools.mutUniformInt, low=1, up=NUM_DISCIPLINAS, indpb=0.2)
 toolbox.register("select", tools.selTournament, tournsize=3)
 
+def sucesso():
+    # Número de conflitos de horário na solução inicial
+    print("Número de conflitos de horário na solução inicial:", len(horarios_iniciais))
+
+    # Número de conflitos de horário na solução otimizada
+    print("Número de conflitos de horário na solução otimizada:", len(horarios_otimizados_depois))
+
+    # Cálculo de média e desvio padrão para as estatísticas
+    media_inicial, desvio_inicial = calcular_media_desvio(fit_mins)
+    print("Média de conflitos de horário mínima:", media_inicial)
+    print("Desvio padrão de conflitos de horário mínima:", desvio_inicial)
+
+    media_media, desvio_media = calcular_media_desvio(fit_avgs)
+    print("Média de conflitos de horário média:", media_media)
+    print("Desvio padrão de conflitos de horário média:", desvio_media)
+
+    media_maxima, desvio_maxima = calcular_media_desvio(fit_maxs)
+    print("Média de conflitos de horário máxima:", media_maxima)
+    print("Desvio padrão de conflitos de horário máxima:", desvio_maxima)
+
 if __name__ == "__main__":
     horarios_iniciais = gerar_horario_inicial()
-    plot_horarios(horarios_iniciais, 'Inicial', None)
+    plot_horarios(horarios_iniciais, 'Inicial', 'antes')
 
     pop_final, logbook = algoritmo_genetico(n_gen=500)  
 
-    # estatísticas adicionais
     gen = logbook.select("gen")
     fit_mins = logbook.select("min")
     fit_avgs = logbook.select("avg")
     fit_maxs = logbook.select("max")
     diversity = logbook.select("diversity")
-    
+        
     # horários otimizados pós algoritmo genético
     horarios_otimizados_depois = criar_cromossomo(disciplinas, NUM_PERIODOS, TAMANHO_PERIODO)
     plot_horarios(horarios_otimizados_depois, 'Otimizado', 'depois')
@@ -201,3 +246,5 @@ if __name__ == "__main__":
     imprimir_horarios_finais(horarios_finais)
     for periodo in horarios_finais:
         print(periodo)
+        
+    sucesso()
