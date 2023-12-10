@@ -9,10 +9,10 @@ NUM_DISCIPLINAS = 8
 
 disciplinas = {
     'Calculo 1': {'horario': 'segunda 08:00-10:00', 'pre_requisitos': []},
-    'Algoritmos': {'horario': 'segunda 10:00-12:00', 'pre_requisitos': ['Matemática']},
+    'Algoritmos': {'horario': 'segunda 10:00-12:00', 'pre_requisitos': ['Calculo 1']},
     'Fundamentos de Sistemas Inteligentes': {'horario': 'terça 08:00-10:00', 'pre_requisitos': ['Algoritmos']},
     'Redes de Computadores': {'horario': 'quarta 14:00-16:00', 'pre_requisitos': ['Algoritmos']},
-    'Banco de Dados': {'horario': 'quinta 08:00-10:00', 'pre_requisitos': ['Matemática']},
+    'Banco de Dados': {'horario': 'quinta 08:00-10:00', 'pre_requisitos': ['Calculo 1']},
     'Estruturas de Dados': {'horario': 'sexta 10:00-12:00', 'pre_requisitos': ['Algoritmos']},
     'Inteligência Artificial': {'horario': 'quarta 08:00-10:00', 'pre_requisitos': ['Fundamentos de Sistemas Inteligentes']},
     'Sistemas Operacionais': {'horario': 'terça 14:00-16:00', 'pre_requisitos': ['Algoritmos']},
@@ -114,45 +114,45 @@ def avaliar_horario(individuo):
                 # Atualiza os horários ocupados para o dia atual
                 horarios_ocupados[dia].add((horario_inicio, horario_fim))
         else:
-            conflitos += 1  # Se a disciplina não existir, cont+1 conflito
+            conflitos += 1  # Se a disciplina não existir, conta como conflito
 
     return conflitos,
 
+
 def inicializar_populacao(pop_size):
-    # Lógica para inicialização personalizada da população
     populacao = []
     for _ in range(pop_size):
-        # Criar indivíduos com uma distribuição preferencial de disciplinas
-
-        # Criação de um indivíduo fictício como exemplo
-        individuo = random.sample(disciplinas.keys(), len(disciplinas.keys()))
+        # Criação de um indivíduo 
+        individuo = gerar_horario_aleatorio()  
         populacao.append(individuo)
     
     return populacao
 
-def selecao(populacao):
-    return tools.selRouletteWheel(populacao, len(populacao))
+#Seleção é a própria seleção natural que vai eliminar os mais fracos
+def selecao(populacao, n):
+    return tools.selRoulette(populacao, n)
 
+#Cruzamento é a mistura entre dois individuos 
 def crossover(individuo1, individuo2):
-    return tools.cxUniform(individuo1, individuo2)
+    return tools.cxUniform(individuo1, individuo2, indpb=0.5)  
 
+#Surgimento de novas caracteristicas
 def mutacao(individuo, indpb=0.05):
-    return tools.mutShuffle(individuo, indpb)
+    return tools.mutShuffleIndexes(individuo, indpb)
 
 def diversity(population):
     unique_individuals = set(map(tuple, population))
     return len(unique_individuals) / len(population)
 
 def algoritmo_genetico(pop_size=100, n_gen=500):
+    #NEVALS é o numero de avaliações na ultima geração
     stats = tools.Statistics(lambda ind: ind.fitness.values)
     stats.register("avg", np.mean)
     stats.register("min", np.min)
     stats.register("max", np.max)
-    
-    # Registrar a função de diversidade corretamente
     stats.register("diversity", diversity)
-
-    # Inicialização personalizada da população usando criar_cromossomo
+    
+    # Inicialização personalizada da população
     pop = [toolbox.individual() for _ in range(pop_size)]
 
     # Avaliação inicial da população
@@ -200,9 +200,23 @@ toolbox.register("individual", tools.initIterate, creator.Individual, gerar_hora
 toolbox.register("population", tools.initRepeat, list, toolbox.individual)
 
 toolbox.register("evaluate", avaliar_horario)
-toolbox.register("mate", tools.cxBlend, alpha=0.5)
-toolbox.register("mutate", tools.mutUniformInt, low=1, up=NUM_DISCIPLINAS, indpb=0.2)
-toolbox.register("select", tools.selTournament, tournsize=3)
+toolbox.register("mate", crossover)  
+toolbox.register("mutate", mutacao)  
+toolbox.register("select", selecao)
+
+def imprimir_populacao(populacao, mensagem=""):
+    print(mensagem)
+    for ind in populacao:
+        print(ind)
+        
+def acompanhar_estatisticas(logbook):
+    for gen in logbook:
+        print(f"Geração {gen['gen']} - Melhor Fitness: {gen['min']}")
+
+def acompanhar_estatisticas_geracao(logbook, geracao):
+    gen = logbook[geracao]
+    print(f"Geração {gen['gen']} - Melhor Fitness: {gen['min']}")
+
 
 def sucesso():
     # Número de conflitos de horário na solução inicial
@@ -224,22 +238,34 @@ def sucesso():
     print("Média de conflitos de horário máxima:", media_maxima)
     print("Desvio padrão de conflitos de horário máxima:", desvio_maxima)
 
+def grafico():
+    gen = range(1, len(fit_avgs) + 1)  
+
+    plt.figure(figsize=(8, 6))
+    plt.plot(gen, fit_avgs, label='Média de Conflitos')
+    plt.title('Evolução da Média de Conflitos ao Longo das Gerações')
+    plt.xlabel('Geração')
+    plt.ylabel('Média de Conflitos')
+    plt.legend()
+    plt.grid(True)
+    plt.show()
+
 if __name__ == "__main__":
     horarios_iniciais = gerar_horario_inicial()
     plot_horarios(horarios_iniciais, 'Inicial', 'antes')
 
-    pop_final, logbook = algoritmo_genetico(n_gen=500)  
+    pop_final, logbook = algoritmo_genetico(n_gen=500)
 
     gen = logbook.select("gen")
     fit_mins = logbook.select("min")
     fit_avgs = logbook.select("avg")
     fit_maxs = logbook.select("max")
     diversity = logbook.select("diversity")
-        
-    # horários otimizados pós algoritmo genético
+    
+    #Horários otimizados pós algoritmo genético
     horarios_otimizados_depois = criar_cromossomo(disciplinas, NUM_PERIODOS, TAMANHO_PERIODO)
     plot_horarios(horarios_otimizados_depois, 'Otimizado', 'depois')
-        
+     
     num_periodos = 4
     tamanho_periodo = 5
     horarios_finais = criar_cromossomo(disciplinas, num_periodos, tamanho_periodo)
@@ -247,4 +273,3 @@ if __name__ == "__main__":
     for periodo in horarios_finais:
         print(periodo)
         
-    sucesso()

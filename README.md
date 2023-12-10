@@ -36,3 +36,5 @@ Executa o algoritmo genético para otimização dos horários.
 Mostra estatísticas da otimização.
 Gera e exibe os horários otimizados após a execução do algoritmo genético.
 Imprime os horários finais gerados.
+
+![Alt text](image.png)
